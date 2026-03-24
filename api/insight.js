@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
 
     const options = {
       hostname: 'generativelanguage.googleapis.com',
-      path: `/v1/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,8 +32,21 @@ module.exports = async function handler(req, res) {
       reqHttp.end();
     });
 
+    // Log full result so we can debug
+    console.log('Gemini result:', JSON.stringify(result));
+
+    // Check for API error
+    if (result?.error) {
+      console.error('Gemini API error:', result.error);
+      return res.status(500).json({ error: result.error.message });
+    }
+
     const text =
-      result?.candidates?.[0]?.content?.parts?.[0]?.text || 'Stay Strong';
+      result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      return res.status(500).json({ error: 'Empty response from Gemini', raw: result });
+    }
 
     res.status(200).json({ insight: text });
   } catch (error) {
