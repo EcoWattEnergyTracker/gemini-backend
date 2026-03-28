@@ -53,4 +53,5 @@ module.exports = async function handler(req, res) {
     console.error('Handler error:', error);
     res.status(500).json({ error: error.message });
   }
+  console.log("API KEY EXISTS:", !!process.env.GEMINI_API_KEY);
 };
